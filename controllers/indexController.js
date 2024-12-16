@@ -8,7 +8,7 @@ const renderIndexPage = async (req, res) => {
       SELECT 
         bd.bill,
         bd.shorttitle,
-        bd.sponsor,
+        bl.sponsorName AS sponsor,
         bl.custom_description AS description,
         bd.lastaction AS status,
         bl.support,

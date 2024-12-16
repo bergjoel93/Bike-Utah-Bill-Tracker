@@ -20,7 +20,10 @@ const renderAdminPage = async (req, res) => {
 // Handle form submission to update bill_list
 const updateBillList = async (req, res) => {
   try {
-    const { bill_name, year, custom_description, support } = req.body;
+    const { bill_name, year, custom_description, sponsorName, support } =
+      req.body;
+
+    console.log("Support:", support);
 
     // Clear the existing bill_list data
     await pool.query("DELETE FROM bill_list");
@@ -29,12 +32,14 @@ const updateBillList = async (req, res) => {
 
     // Insert updated data
     for (let i = 0; i < bill_name.length; i++) {
+      console.log("support value:", support[i]);
       await pool.query(
-        "INSERT INTO bill_list (bill_name, year, custom_description, support) VALUES ($1, $2, $3, $4)",
+        "INSERT INTO bill_list (bill_name, year, custom_description, sponsorName, support) VALUES ($1, $2, $3, $4, $5)",
         [
           bill_name[i],
           year[i],
           custom_description[i] || null,
+          sponsorName[i] || null,
           support[i] === "on",
         ]
       );
@@ -46,7 +51,7 @@ const updateBillList = async (req, res) => {
     //console.log("Request: ", req);
 
     // Re-render the admin page with errors if any
-    renderAdminPage(req, res);
+    res.redirect("/admin");
   } catch (error) {
     console.error("Error updating bill list:", error);
     res.status(500).send("Error updating bill list");

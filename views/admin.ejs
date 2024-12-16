@@ -28,6 +28,7 @@
             <th>Bill Name</th>
             <th>Year</th>
             <th>Custom Description</th>
+            <th>Sponsor Name</th>
             <th>Support?</th>
             <th>Actions</th>
           </tr>
@@ -57,9 +58,17 @@
               >
             </td>
             <td>
-              <input type="checkbox" name="support" <%= bill.support ? 'checked'
-              : '' %> />
+              <input
+                type="text"
+                name="sponsorName[]"
+                value="<%= bill.sponsorname || '' %>"
+              />
             </td>
+            <td>
+              <input type="checkbox" name="support[]" <%= bill.support ?
+              'checked' : '' %> />
+            </td>
+
             <td>
               <button type="button" onclick="deleteRow(this)">Delete</button>
             </td>
@@ -74,6 +83,7 @@
       <br /><br />
       <button type="submit">Publish</button>
     </form>
+    <button id="logout"><a href="/logout">Logout</a></button>
 
     <script>
       // Function to add a new row to the table
@@ -84,12 +94,13 @@
         const newRow = table.insertRow();
 
         newRow.innerHTML = `
-          <td><input type="text" name="bill_name[]" value="" required></td>
-          <td><input type="text" name="year[]" value="" required></td>
-          <td><textarea name="custom_description[]"></textarea></td>
-          <td><input type="checkbox" name="support" ></td>
-          <td><button type="button" onclick="deleteRow(this)">Delete</button></td>
-        `;
+        <td><input type="text" name="bill_name[]" value="" required></td>
+        <td><input type="text" name="year[]" value="" required></td>
+        <td><textarea name="custom_description[]"></textarea></td>
+        <td><input type="text" name="sponsorName[]" value=""></td>
+        <td><input type="checkbox" name="support[]"></td>
+        <td><button type="button" onclick="deleteRow(this)">Delete</button></td>
+      `;
       }
 
       // Function to delete a row from the table
@@ -98,6 +109,19 @@
         //TODO delete the entry from the database.
         row.remove();
       }
+
+      document.getElementById("billForm").addEventListener("submit", () => {
+        document
+          .querySelectorAll('input[type="checkbox"][name="support[]"]')
+          .forEach((checkbox) => {
+            if (!checkbox.checked) {
+              checkbox.insertAdjacentHTML(
+                "afterend",
+                '<input type="hidden" name="support[]" value="false">'
+              );
+            }
+          });
+      });
     </script>
   </body>
 </html>

@@ -2,7 +2,11 @@
 require("dotenv").config();
 const express = require("express");
 const cron = require("node-cron");
+const session = require("express-session");
 
+/**
+ * -------------- GENERAL SETUP ----------------
+ */
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -15,9 +19,25 @@ app.set("view engine", "ejs");
 // Serve static files from the "public" directory
 app.use(express.static("public"));
 
+// Session configuration
+app.use(
+  session({
+    secret: process.env.SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 3 * 60 * 60 * 1000, // 3 hours in milliseconds
+    },
+  })
+);
+
 // Middleware to parse form data
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+/**
+ * -------------- ROUTES ----------------
+ */
 
 app.use("/", router);
 

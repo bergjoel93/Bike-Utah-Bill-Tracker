@@ -52,3 +52,12 @@ td textarea {
 td input {
   text-align: center;
 }
+
+#logout {
+  margin-top: 10px;
+}
+
+#logout a {
+  color: white;
+  text-decoration: none;
+}
