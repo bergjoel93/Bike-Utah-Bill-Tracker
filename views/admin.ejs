@@ -1,0 +1,103 @@
+<!-- views/admin.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Page - Bill List</title>
+    <link rel="stylesheet" href="/styles/admin.css" />
+  </head>
+  <body>
+    <h1>Admin Page - Bill List</h1>
+    <!-- Errors -->
+    <% if (errors && errors.length > 0) { %>
+    <div class="error">
+      <p>The following bills could not be synced:</p>
+      <ul>
+        <% errors.forEach(error => { %>
+        <li><%= error %></li>
+        <% }) %>
+      </ul>
+    </div>
+    <% } %>
+
+    <form id="billForm" action="/admin/publish" method="POST">
+      <table id="billTable">
+        <thead>
+          <tr>
+            <th>Bill Name</th>
+            <th>Year</th>
+            <th>Custom Description</th>
+            <th>Support?</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% bills.forEach(bill => { %>
+          <tr>
+            <td>
+              <input
+                type="text"
+                name="bill_name[]"
+                value="<%= bill.bill_name %>"
+                required
+              />
+            </td>
+            <td>
+              <input
+                type="text"
+                name="year[]"
+                value="<%= bill.year %>"
+                required
+              />
+            </td>
+            <td>
+              <textarea name="custom_description[]">
+<%= bill.custom_description || '' %></textarea
+              >
+            </td>
+            <td>
+              <input type="checkbox" name="support" <%= bill.support ? 'checked'
+              : '' %> />
+            </td>
+            <td>
+              <button type="button" onclick="deleteRow(this)">Delete</button>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+
+      <button class="add-row-btn" type="button" onclick="addNewRow()">
+        Add New Row
+      </button>
+      <br /><br />
+      <button type="submit">Publish</button>
+    </form>
+
+    <script>
+      // Function to add a new row to the table
+      function addNewRow() {
+        const table = document
+          .getElementById("billTable")
+          .getElementsByTagName("tbody")[0];
+        const newRow = table.insertRow();
+
+        newRow.innerHTML = `
+          <td><input type="text" name="bill_name[]" value="" required></td>
+          <td><input type="text" name="year[]" value="" required></td>
+          <td><textarea name="custom_description[]"></textarea></td>
+          <td><input type="checkbox" name="support" ></td>
+          <td><button type="button" onclick="deleteRow(this)">Delete</button></td>
+        `;
+      }
+
+      // Function to delete a row from the table
+      function deleteRow(button) {
+        const row = button.closest("tr");
+        //TODO delete the entry from the database.
+        row.remove();
+      }
+    </script>
+  </body>
+</html>
