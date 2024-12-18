@@ -1,0 +1,45 @@
+<!-- views/results.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Results of Publication</title>
+    <link rel="stylesheet" href="/styles/admin.css" />
+    <link rel="stylesheet" href="/styles/results.css" />
+  </head>
+  <body>
+    <h1>Results of Publication</h1>
+
+    <div class="results-container">
+      <div class="results-list-container">
+        <h2>Bills that Synced Successfully</h2>
+        <div class="results-list">
+          <ul>
+            <% results.success.forEach(bill => { %>
+            <li><%= bill.name %> (Year: <%= bill.year %>)</li>
+            <% }) %>
+          </ul>
+        </div>
+      </div>
+
+      <div class="results-list-container" id="failure">
+        <h2>Bills that Didn't Sync</h2>
+        <div class="results-list">
+          <ul>
+            <% results.errors.forEach(bill => { %>
+            <li><%= bill.name %> (Year: <%= bill.year %>)</li>
+            <% }) %>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button onclick="window.location.href='/admin'">
+        Return to Admin Console
+      </button>
+      <button onclick="window.location.href='/'">Return to Home Page</button>
+    </div>
+  </body>
+</html>

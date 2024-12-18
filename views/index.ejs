@@ -5,58 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bill Tracker</title>
     <link rel="stylesheet" href="/styles/index.css" />
-    <style>
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-      }
-      th,
-      td {
-        padding: 10px;
-        border: 1px solid #ccc;
-        text-align: left;
-      }
-      th {
-        background-color: #007bff;
-        color: #fff;
-      }
-      tr:nth-child(even) {
-        background-color: #f2f2f2;
-      }
-      h1 {
-        text-align: center;
-      }
-    </style>
   </head>
   <body>
-    <h1>Bill Tracker</h1>
-
     <table>
       <thead>
         <tr>
+          <th>Bike Utah</th>
           <th>Bill #</th>
           <th>Name</th>
           <th>Sponsor</th>
           <th>Description</th>
           <th>Status</th>
-          <th>Bike Utah Support</th>
           <th>Updated</th>
         </tr>
       </thead>
       <tbody>
         <% bills.forEach(bill => { %>
         <tr>
-          <td><%= bill.bill %></td>
-          <td><%= bill.shorttitle %></td>
+          <td class="support">
+            <% if (bill.support) { %>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              fill="#e8eaed"
+              class="icon thumbs-up"
+            >
+              <path
+                d="M720-120H280v-520l280-280 50 50q7 7 11.5 19t4.5 23v14l-44 174h258q32 0 56 24t24 56v80q0 7-2 15t-4 15L794-168q-9 20-30 34t-44 14Zm-360-80h360l120-280v-80H480l54-220-174 174v406Zm0-406v406-406Zm-80-34v80H160v360h120v80H80v-520h200Z"
+              />
+            </svg>
+            <% } else { %>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              fill="#e8eaed"
+              class="icon thumbs-down"
+            >
+              <path
+                d="M240-840h440v520L400-40l-50-50q-7-7-11.5-19t-4.5-23v-14l44-174H120q-32 0-56-24t-24-56v-80q0-7 2-15t4-15l120-282q9-20 30-34t44-14Zm360 80H240L120-480v80h360l-54 220 174-174v-406Zm0 406v-406 406Zm80 34v-80h120v-360H680v-80h200v520H680Z"
+              />
+            </svg>
+            <% } %>
+          </td>
+
+          <td class="bill-number"><%= bill.bill %></td>
+          <td class="title"><%= bill.shorttitle %></td>
           <td><%= bill.sponsor %></td>
-          <td><%= bill.description || '' %></td>
+          <td class="description"><%= bill.description || '' %></td>
           <td><%= bill.status %></td>
-          <td><%= bill.support ? 'Yes' : 'No' %></td>
-          <td><%= new Date(bill.updated).toLocaleString() %></td>
+          <td class="updated">
+            <%= new Date(bill.updated).toLocaleString() %>
+          </td>
         </tr>
         <% }); %>
       </tbody>
     </table>
+    <script>
+      /**
+       * Transforms a bill name by removing leading zeros and adding a dash.
+       * @param {string} billName - The bill name to transform (e.g., 'HB0014').
+       * @returns {string} - The transformed bill name (e.g., 'HB - 14').
+       */
+      function transformBillName(billName) {
+        // Match the letters and numbers separately
+        const match = billName.match(/^([A-Z]+)(\d+)$/);
+
+        if (!match) {
+          throw new Error("Invalid bill name format");
+        }
+
+        const letters = match[1]; // The letter part (e.g., 'HB')
+        const numbers = parseInt(match[2], 10); // Convert the number part to an integer to remove leading zeros
+
+        return `${letters} ${numbers}`;
+      }
+      // Select all elements with the 'bill-name' class and apply the transformation
+      document.querySelectorAll(".bill-number").forEach((element) => {
+        element.textContent = transformBillName(element.textContent);
+      });
+    </script>
   </body>
 </html>

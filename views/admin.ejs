@@ -9,17 +9,6 @@
   </head>
   <body>
     <h1>Admin Page - Bill List</h1>
-    <!-- Errors -->
-    <% if (errors && errors.length > 0) { %>
-    <div class="error">
-      <p>The following bills could not be synced:</p>
-      <ul>
-        <% errors.forEach(error => { %>
-        <li><%= error %></li>
-        <% }) %>
-      </ul>
-    </div>
-    <% } %>
 
     <form id="billForm" action="/admin/publish" method="POST">
       <table id="billTable">
@@ -64,9 +53,12 @@
                 value="<%= bill.sponsorname || '' %>"
               />
             </td>
+
             <td>
-              <input type="checkbox" name="support[]" <%= bill.support ?
-              'checked' : '' %> />
+              <select name="support[]">
+                <option value="support" <%= bill.support ? 'selected' : '' %>>Support</option>
+                <option value="doesntSupport" <%= !bill.support ? 'selected' : '' %>>Doesn't Support</option>
+              </select>
             </td>
 
             <td>
@@ -86,6 +78,46 @@
     <button id="logout"><a href="/logout">Logout</a></button>
 
     <script>
+      document
+        .getElementById("billForm")
+        .addEventListener("submit", function (event) {
+          const billNames = document.querySelectorAll(
+            'input[name="bill_name[]"]'
+          );
+          const years = document.querySelectorAll('input[name="year[]"]');
+          const descriptions = document.querySelectorAll(
+            'textarea[name="custom_description[]"]'
+          );
+          let isValid = true;
+
+          // Refined regex for exactly two uppercase letters followed by four digits
+          const billNameRegex = /^[A-Z]{2}\d{4}$/;
+          billNames.forEach((input) => {
+            if (!billNameRegex.test(input.value)) {
+              alert("Bill Name must be in the format 'HB0014' (two uppercase letters followed by four digits).");
+              isValid = false;
+            }
+          });
+
+          years.forEach((input) => {
+            if (!/^\d{4}$/.test(input.value)) {
+              alert("Year must be a 4-digit number.");
+              isValid = false;
+            }
+          });
+
+          descriptions.forEach((textarea) => {
+            if (textarea.value.length > 750) {
+              alert("Custom Description must be less than 750 characters.");
+              isValid = false;
+            }
+          });
+
+          if (!isValid) {
+            event.preventDefault(); // Prevent form submission if validation fails
+          }
+        });
+
       // Function to add a new row to the table
       function addNewRow() {
         const table = document
@@ -98,7 +130,12 @@
         <td><input type="text" name="year[]" value="" required></td>
         <td><textarea name="custom_description[]"></textarea></td>
         <td><input type="text" name="sponsorName[]" value=""></td>
-        <td><input type="checkbox" name="support[]"></td>
+        <td>
+          <select name="support[]">
+            <option value="support">Support</option>
+            <option value="doesntSupport">Doesn't Support</option>
+          </select>
+        </td>
         <td><button type="button" onclick="deleteRow(this)">Delete</button></td>
       `;
       }

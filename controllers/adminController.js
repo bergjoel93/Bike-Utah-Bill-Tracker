@@ -6,11 +6,9 @@ const fetchAndUpdateBills = require("../db/fetchBills");
 
 // Render the admin page with bill_list data
 const renderAdminPage = async (req, res) => {
-  const errors = req.body.errors;
-
   try {
     const result = await pool.query("SELECT * FROM bill_list");
-    res.render("admin", { bills: result.rows, errors: errors });
+    res.render("admin", { bills: result.rows });
   } catch (error) {
     console.error("Error fetching bill list:", error);
     res.status(500).send("Error fetching bill list");
@@ -40,18 +38,19 @@ const updateBillList = async (req, res) => {
           year[i],
           custom_description[i] || null,
           sponsorName[i] || null,
-          support[i] === "on",
+          support[i] === "support",
         ]
       );
     }
 
     // resync bill list with bill_data
-    const errors = await fetchAndUpdateBills();
-    req.body.errors = errors;
+    const results = await fetchAndUpdateBills();
+    // assign errors to the request body.
+    req.body.results = results;
     //console.log("Request: ", req);
 
     // Re-render the admin page with errors if any
-    res.redirect("/admin");
+    res.render("results", { results });
   } catch (error) {
     console.error("Error updating bill list:", error);
     res.status(500).send("Error updating bill list");

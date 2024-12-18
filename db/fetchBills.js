@@ -5,10 +5,10 @@ require("dotenv").config();
 const fetch = require("node-fetch");
 
 // Function to fetch a single bill from the API
-const fetchBillFromAPI = async (billName) => {
+const fetchBillFromAPI = async (billName, year) => {
   try {
     const response = await fetch(
-      `https://glen.le.utah.gov/bills/2018GS/${billName}/${process.env.API_KEY}`,
+      `https://glen.le.utah.gov/bills/${year}GS/${billName}/${process.env.API_KEY}`,
       {
         headers: { "x-api-key": process.env.API_KEY },
       }
@@ -29,7 +29,9 @@ const fetchBillFromAPI = async (billName) => {
 
 // Function to fetch all bills from the bill_list table and update bill_data
 const fetchAndUpdateBills = async () => {
-  let errors = []; // Collect the bill names that failed to sync
+  let errors = []; // Collect the bill names that failed to sync.
+  let success = []; // Collect the bill names that successfully synced.
+  let results = {};
 
   try {
     // Step 1: Clear the existing data in the bill_data table
@@ -41,8 +43,8 @@ const fetchAndUpdateBills = async () => {
       "Cleared existing data in bill_data and reset bill_id sequence."
     );
 
-    // Step 2: Get all bills from bill_list
-    const result = await pool.query("SELECT bill_name FROM bill_list");
+    // Step 2: Get all bills and their years from bill_list
+    const result = await pool.query("SELECT bill_name, year FROM bill_list");
     const bills = result.rows;
 
     if (bills.length === 0) {
@@ -50,11 +52,11 @@ const fetchAndUpdateBills = async () => {
       return [];
     }
 
-    for (const { bill_name } of bills) {
-      console.log(`Fetching data for bill: ${bill_name}`);
+    for (const { bill_name, year } of bills) {
+      console.log(`Fetching data for bill: ${bill_name} for year: ${year}`);
 
       // Fetch bill data from the API
-      const billData = await fetchBillFromAPI(bill_name);
+      const billData = await fetchBillFromAPI(bill_name, year);
 
       if (billData) {
         try {
@@ -101,19 +103,24 @@ const fetchAndUpdateBills = async () => {
           );
 
           console.log(`Bill ${bill_name} updated successfully.`);
+          success.push({ name: bill_name, year: year });
         } catch (dbError) {
           console.error(`Database error for bill ${bill_name}:`, dbError);
-          errors.push(bill_name);
+          errors.push({ name: bill_name, year: year });
         }
       } else {
-        errors.push(bill_name); // Add to errors if the fetch failed
+        errors.push({ name: bill_name, year: year }); // Add to errors if the fetch failed
       }
     }
   } catch (error) {
     console.error("Error fetching or updating bills:", error);
   }
   console.log("Errors being returned from fetchAndUpdateBills:", errors);
-  return errors; // Return the list of bills that could not be synced
+  console.log("Successes being returned from fetchAndUpdateBills:", success);
+
+  results = { errors: errors, success: success };
+  console.log("Results from fetchAndUpdateBills:", results);
+  return results; // Return the list of bills that could not be synced
 };
 
 module.exports = fetchAndUpdateBills;
